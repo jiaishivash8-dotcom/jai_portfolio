@@ -1,0 +1,147 @@
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login — Input & Output Screen</title>
+    <style>
+      :root{--bg:#0f1724;--card:#0b1220;--accent:#6ee7b7;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+      *{box-sizing:border-box}
+      body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,-apple-system,"Helvetica Neue",Arial;color:#e6eef6;background:linear-gradient(180deg,#071025 0%, #071a2e 100%);min-height:100vh;display:grid;place-items:center;padding:32px}
+      .container{width:100%;max-width:920px;display:grid;grid-template-columns:1fr 420px;gap:28px}
+      .hero{padding:28px;border-radius:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.04)}
+      h1{margin:0 0 8px;font-size:22px;color:var(--accent)}
+      p.lead{margin:0 0 18px;color:var(--muted);line-height:1.45}
+
+      /* Login card */
+      .card{background:var(--card);padding:22px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 8px 30px rgba(2,6,23,0.5)}
+      label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+      input[type="text"], input[type="password"]{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:#e6eef6;font-size:14px}
+      .row{display:flex;gap:12px}
+      .btn{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(90deg,#10b981,#06b6d4);color:#052025;font-weight:600}
+      .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent)}
+
+      .meta{font-size:13px;color:var(--muted);margin-top:10px}
+
+      /* Output screen */
+      .output{padding:18px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));border:1px dashed rgba(255,255,255,0.03);min-height:160px;display:flex;flex-direction:column;justify-content:center}
+      .output .title{font-weight:700;color:#bfeadf;margin-bottom:6px}
+      .status{font-size:18px;font-weight:700;margin:8px 0}
+      .status.success{color:#34d399}
+      .status.fail{color:#fb7185}
+      .details{font-size:13px;color:var(--muted);margin-top:8px}
+
+      /* small responsive */
+      @media (max-width:880px){
+        .container{grid-template-columns:1fr;}
+      }
+
+      /* tiny form helper */
+      .hint{font-size:12px;color:var(--muted);margin-top:6px}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section class="hero card">
+        <h1>Sign in to your account</h1>
+        <p class="lead">A simple login page with an input area and an output screen that displays the result (success / failure) with helpful details. This is purely client-side demo code—no server required.</p>
+
+        <form id="loginForm" autocomplete="off">
+          <div style="margin-bottom:12px">
+            <label for="username">Email or username</label>
+            <input id="username" name="username" type="text" placeholder="you@example.com or username" required />
+          </div>
+
+          <div style="margin-bottom:6px">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="••••••••" required />
+          </div>
+
+          <div class="row" style="margin-top:12px;align-items:center">
+            <button class="btn" type="submit">Sign in</button>
+            <button type="button" id="demoBtn" class="btn secondary">Use demo cred</button>
+          </div>
+
+          <div class="meta">Tip: this demo accepts <strong>demo@example.com</strong> / <strong>DemoPass123</strong> as valid credentials.</div>
+        </form>
+
+        <div style="margin-top:18px;color:var(--muted);font-size:13px">
+          <strong>Accessibility</strong>: form fields are labeled and keyboard accessible. Press <kbd>Tab</kbd> to move and <kbd>Enter</kbd> to submit.
+        </div>
+      </section>
+
+      <aside class="card output" aria-live="polite">
+        <div class="title">Output screen</div>
+        <div id="statusLine" class="status" aria-hidden="false">Waiting for input...</div>
+        <div id="details" class="details">Enter credentials on the left and click <em>Sign in</em>. The output area will show a success or failure message with extra details.</div>
+      </aside>
+    </div>
+
+    <script>
+      // Simple client-side demo logic for input -> output
+      const form = document.getElementById('loginForm');
+      const statusLine = document.getElementById('statusLine');
+      const details = document.getElementById('details');
+      const demoBtn = document.getElementById('demoBtn');
+
+      const DEMO_USER = 'demo@example.com';
+      const DEMO_PASS = 'DemoPass123';
+
+      function showOutput(success, message, extra){
+        if(success){
+          statusLine.textContent = 'Login successful';
+          statusLine.classList.remove('fail');
+          statusLine.classList.add('success');
+        } else {
+          statusLine.textContent = 'Login failed';
+          statusLine.classList.remove('success');
+          statusLine.classList.add('fail');
+        }
+        details.innerHTML = `<div>${message}</div>${extra ? `<div style=\"margin-top:8px;color:var(--muted);font-size:13px\">${extra}</div>`: ''}`;
+      }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Basic validation
+        if(!username || !password){
+          showOutput(false, 'Please enter both username and password.');
+          return;
+        }
+
+        // Simulate processing delay
+        statusLine.textContent = 'Checking credentials...';
+        statusLine.classList.remove('fail','success');
+        details.textContent = 'Verifying — please wait';
+
+        setTimeout(()=>{
+          // Demo authentication logic
+          const normalized = username.toLowerCase();
+          if((normalized === DEMO_USER || normalized === 'demo') && password === DEMO_PASS){
+            // success
+            const now = new Date();
+            showOutput(true, `Welcome back, <strong>${username}</strong>!`, `Signed in at ${now.toLocaleString()}`);
+          } else {
+            // failure
+            // Provide safe hints (not revealing which part is wrong in a real app)
+            showOutput(false, 'Invalid username or password.', 'Tip: try the demo credentials shown on the left for this demo.');
+          }
+        }, 800);
+      });
+
+      demoBtn.addEventListener('click', ()=>{
+        document.getElementById('username').value = DEMO_USER;
+        document.getElementById('password').value = DEMO_PASS;
+      });
+
+      // Optional: prefill if query params provided (convenience for demos)
+      (function prefillFromQuery(){
+        const q = new URLSearchParams(location.search);
+        if(q.get('user')) document.getElementById('username').value = q.get('user');
+        if(q.get('pwd')) document.getElementById('password').value = q.get('pwd');
+      })();
+    </script>
+  </body>
+  </html>
